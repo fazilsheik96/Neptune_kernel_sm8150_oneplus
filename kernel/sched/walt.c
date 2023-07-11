@@ -3301,10 +3301,10 @@ void walt_irq_work(struct irq_work *irq_work)
 	 */
 	if (!is_migration) {
 		//on kprofile performance mode, use 6ms ravg window
-		if (kp_active_mode() == 3 && sched_ravg_window == 12000000)
+		if (kp_active_mode() == 3 && sched_ravg_window == 6000000)
+			new_sched_ravg_window == 3000000;
+		else if (kp_active_mode() != 3 && sched_ravg_window == 3000000)
 			new_sched_ravg_window == 6000000;
-		else if (kp_active_mode() != 3 && sched_ravg_window == 6000000)
-			new_sched_ravg_window == 12000000;
 
 		if (sched_ravg_window != new_sched_ravg_window) {
 			printk_deferred("ALERT: changing window size from %u to %u at %lu\n",
