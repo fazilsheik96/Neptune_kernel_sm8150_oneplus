@@ -1,0 +1,66 @@
+From b30abfb6553510fbc6834652e78b8260d2d6c325 Mon Sep 17 00:00:00 2001
+From: John Galt <johngaltfirstrun@gmail.com>
+Date: Mon, 31 Jul 2023 11:49:02 -0400
+Subject: [PATCH] input: fix cb9910af193c77ed4202f6f7711dd4d733e4298c
+
+This should always be 0 except when single tap is pressed.
+
+Ensure it is set back to 0 after notify. Otherwise rarely when turning
+screen off in a single tap to ambient scenario, if sensor loads in
+quickly ambient will pop back up. Then at trigger it will go 1->0->1
+triggering sensor.
+---
+ drivers/input/oneplus_touchscreen/touchpanel_common.h       | 1 +
+ .../input/oneplus_touchscreen/touchpanel_common_driver.c    | 6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/input/oneplus_touchscreen/touchpanel_common.h b/drivers/input/oneplus_touchscreen/touchpanel_common.h
+index b1b15b79928a..a5d9f841ef14 100644
+--- a/drivers/input/oneplus_touchscreen/touchpanel_common.h
++++ b/drivers/input/oneplus_touchscreen/touchpanel_common.h
+@@ -413,6 +413,7 @@ struct touchpanel_data {
+ 	void *chip_data;	/*Chip Related data */
+ 	void *private_data;	/*Reserved Private data */
+ 	u8 double_tap_pressed;
++	u8 single_tap_pressed;
+ };
+ 
+ struct touchpanel_operations {
+diff --git a/drivers/input/oneplus_touchscreen/touchpanel_common_driver.c b/drivers/input/oneplus_touchscreen/touchpanel_common_driver.c
+index c4f55542a43f..1f9121c9a286 100644
+--- a/drivers/input/oneplus_touchscreen/touchpanel_common_driver.c
++++ b/drivers/input/oneplus_touchscreen/touchpanel_common_driver.c
+@@ -394,6 +394,8 @@ static void tp_gesture_report_single_tap(struct work_struct *work)
+ 
+ 	sysfs_notify(&ts->client->dev.kobj, NULL, "single_tap_pressed");
+ 	__pm_relax(&ts->single_tap_pm);
++	msleep(300);
++	ts->single_tap_pressed = 0;
+ }
+ 
+ static inline void tp_gesture_handle(struct touchpanel_data *ts)
+@@ -477,10 +479,12 @@ static inline void tp_gesture_handle(struct touchpanel_data *ts)
+ 		input_report_key(ts->input_dev, KEY_F4, 0);
+ 		input_sync(ts->input_dev);
+ 		if (key == KEY_GESTURE_SINGLE_TAP) {
++			ts->single_tap_pressed = 1;
+ 			smp_mb();
+ 			schedule_delayed_work(&ts->report_single_tap_work, msecs_to_jiffies(250));
+ 			__pm_stay_awake(&ts->single_tap_pm);
+ 		} else {
++			ts->single_tap_pressed = 0;
+ 			cancel_delayed_work(&ts->report_single_tap_work);
+ 			__pm_relax(&ts->single_tap_pm);
+ 			tp_report_key(ts, key);
+@@ -503,7 +507,7 @@ static inline ssize_t single_tap_pressed_get(struct device *device,
+ 				char *buffer)
+ {
+ 	struct touchpanel_data *ts = dev_get_drvdata(device);
+-	return scnprintf(buffer, PAGE_SIZE, "%d\n", ts->gesture.gesture_type == SingleTap);
++	return scnprintf(buffer, PAGE_SIZE, "%i\n", ts->single_tap_pressed);
+ }
+ 
+ static DEVICE_ATTR(single_tap_pressed, S_IRUGO, single_tap_pressed_get, NULL);
+-- 
+2.34.1
+
