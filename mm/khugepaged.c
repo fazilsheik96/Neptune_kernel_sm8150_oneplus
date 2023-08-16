@@ -1313,16 +1313,20 @@ static void retract_page_tables(struct address_space *mapping, pgoff_t pgoff)
 				unsigned long end = addr + HPAGE_PMD_SIZE;
 
 				vm_write_begin(vma);
-
 				mmu_notifier_invalidate_range_start(mm, addr,
 								    end);
 				ptl = pmd_lock(mm, pmd);
 				/* assume page table is clear */
 				_pmd = pmdp_collapse_flush(vma, addr, pmd);
 				spin_unlock(ptl);
+
 				mm_dec_nr_ptes(vma->vm_mm);
 				tlb_remove_table_sync_one();
 				vm_write_end(vma);
+
+				atomic_long_dec(&mm->nr_ptes);
+				tlb_remove_table_sync_one();
+
 				pte_free(mm, pmd_pgtable(_pmd));
 				mmu_notifier_invalidate_range_end(mm, addr,
 								  end);

@@ -43,8 +43,10 @@ static int nft_objref_init(const struct nft_ctx *ctx,
 	if (IS_ERR(obj))
 		return -ENOENT;
 
+	if (!nft_use_inc(&obj->use))
+		return -EMFILE;
+
 	nft_objref_priv(expr) = obj;
-	obj->use++;
 
 	return 0;
 }
@@ -74,6 +76,16 @@ static void nft_objref_deactivate(const struct nft_ctx *ctx,
 		return;
 
 	obj->use--;
+	nft_use_dec(&obj->use);
+}
+
+static void nft_objref_activate(const struct nft_ctx *ctx,
+				const struct nft_expr *expr)
+{
+	struct nft_object *obj = nft_objref_priv(expr);
+
+	nft_use_inc_restore(&obj->use);
+>>>>>>> 80b73c056d2076d12f9e50c753bb440fc79f30c9
 }
 
 static void nft_objref_activate(const struct nft_ctx *ctx,

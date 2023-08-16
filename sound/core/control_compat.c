@@ -307,7 +307,7 @@ static int ctl_elem_read_user(struct snd_card *card,
 	if (err < 0)
 		goto error;
 	down_read(&card->controls_rwsem);
-	err = snd_ctl_elem_read(card, &data);
+	err = snd_ctl_elem_read(card, data);
 	up_read(&card->controls_rwsem);
 	if (err < 0)
 		goto error;

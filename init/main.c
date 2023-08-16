@@ -490,6 +490,7 @@ void __init __weak thread_stack_cache_init(void)
 }
 #endif
 
+<<<<<<< HEAD
 void __init __weak mem_encrypt_init(void) { }
 
 /* Report memory auto-initialization states for this boot. */
