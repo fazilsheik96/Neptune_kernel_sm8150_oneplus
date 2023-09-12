@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # HOME path
-export HOME=/home/harish/neptune
+export HOME=/home/fazil/aospa
 
 # Compiler environment
-export CLANG_PATH=$HOME/neutron-clang/bin
+export CLANG_PATH=$HOME/prebuilts/neutron-clang/bin
 export PATH="$CLANG_PATH:$PATH"
 export CROSS_COMPILE=aarch64-linux-gnu-
 export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
-export KBUILD_BUILD_USER=Codecity001
-export KBUILD_BUILD_HOST=Harish
+export KBUILD_BUILD_USER=fazilsheik
+export KBUILD_BUILD_HOST=fazil
 
 echo
 echo "Setting defconfig"
