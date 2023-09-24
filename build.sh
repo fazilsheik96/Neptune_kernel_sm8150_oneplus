@@ -4,7 +4,7 @@
 export HOME=/home/fazil/work/neptune-g
 
 # Compiler environment
-export CLANG_PATH=/home/fazil/neutron-clang/bin
+export CLANG_PATH=/home/fazil/work/neutron-clang/bin
 export PATH="$CLANG_PATH:$PATH"
 export CROSS_COMPILE=aarch64-linux-gnu-
 export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
