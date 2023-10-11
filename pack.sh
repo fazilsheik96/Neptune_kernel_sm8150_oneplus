@@ -19,7 +19,18 @@ export LOCALVERSION="-${KNAME}-$(echo "${VERSION}")"
 if [[ "${1}" == "k" ]] ; then
 	echo "Building with Kernel SU"
 	patch -p1 < kernelsu.patch
-	curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+	bash kernelSU.sh
+	if [[ "${2}" == "o" ]] ; then
+		echo
+		echo "Applying GPUOC.patch"
+		patch -p1 < GPUOC.patch
+	fi
+else
+	if [[ "${1}" == "o" ]] ; then
+		echo
+		echo "Applying GPUOC.patch"
+		patch -p1 < GPUOC.patch
+	fi
 fi
 
 # Let's build
